@@ -6,7 +6,8 @@ async function scrapeMotoGPStandings() {
     try {
         const browser = await puppeteer.launch({
             headless: "new",
-            defaultViewport: { width: 1920, height: 1080 }
+            defaultViewport: { width: 1920, height: 1080 },
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
         const page = await browser.newPage();
 
