@@ -1,4 +1,4 @@
-name: Scraping Data
+name: Data Finder
 
 on:
   schedule:
