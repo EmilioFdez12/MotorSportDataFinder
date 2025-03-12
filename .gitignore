@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment and Secrets
+.env*
+serviceAccount.json
+
+# Data
+/data/*.json
+
+# IDE
+.vscode/
+.idea/
+
+# System
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
