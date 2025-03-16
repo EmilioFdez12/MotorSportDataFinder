@@ -11,7 +11,7 @@ async function scrapeF1Drivers() {
     const page = await browser.newPage();
 
     try {
-        await page.goto('https://www.formula1.com/en/results/2024/drivers', {
+        await page.goto('https://www.formula1.com/en/results/2025/drivers', {
             waitUntil: 'networkidle0',
             timeout: 30000
         });
