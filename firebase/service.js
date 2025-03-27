@@ -15,36 +15,41 @@ async function uploadDataIfChanged(dataType) {
     // Referencia a la colección
     const dataCollection = db.collection(dataType);
     
-    // Intentar obtener el último documento
     let shouldUpload = true;
     
     try {
-      const lastEntryQuery = await dataCollection.orderBy('timestamp', 'desc').limit(1).get();
+      // Obtener el último documento de la colección
+      const lastEntryQuery = await dataCollection
+        .orderBy('timestamp', 'desc')
+        .limit(1)
+        .get();
       
-      // Comparar con los últimos datos en Firebase
+      // Comparar con los datos existentes en Firebase
       if (!lastEntryQuery.empty) {
         const lastEntry = lastEntryQuery.docs[0].data();
-        // Comparar solo los datos, no el timestamp
         const lastData = lastEntry.data;
         
-        // Comparación profunda de objetos JSON
+        // Comparación profunda de objetos
         shouldUpload = JSON.stringify(currentData) !== JSON.stringify(lastData);
       }
     } catch (error) {
-      // Si la colección no existe, simplemente continuamos con la subida
-      console.log(`ℹ️ Colección ${dataType} no encontrada, se creará automáticamente`);
+      console.log(`ℹ️ No se encontraron datos previos en ${dataType}, se procederá con la subida`);
     }
     
-    // Subir si hay cambios o no hay datos previos
     if (shouldUpload) {
-      await dataCollection.add({
+      // Usar un ID fijo para actualizar el documento
+      const docId = `${dataType}_latest`;
+      
+      // Actualizar o crear el documento con los nuevos datos
+      await dataCollection.doc(docId).set({
         data: currentData,
         timestamp: admin.firestore.FieldValue.serverTimestamp()
       });
-      console.log(`✅ Datos de ${dataType} subidos a Firebase`);
+      
+      console.log(`✅ Datos de ${dataType} actualizados en Firebase`);
       return true;
     } else {
-      console.log(`ℹ️ No hay cambios en ${dataType}, no se sube a Firebase`);
+      console.log(`ℹ️ No hay cambios en ${dataType}, no se actualiza en Firebase`);
       return false;
     }
   } catch (error) {
