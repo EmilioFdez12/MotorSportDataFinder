@@ -14,6 +14,11 @@ const { uploadDataIfChanged } = require('./firebase/service');
 
 async function runAllScrapers() {
     console.log('🚀 Iniciando proceso de scraping...');
+
+    const timeout = setTimeout(() => {
+        console.error('❌ El proceso ha excedido el tiempo máximo de ejecución (15 minutos)');
+        process.exit(1);
+    }, 15 * 60 * 1000);
     
     try {
         // Ejecutar scraping de F1 pilotos
@@ -42,6 +47,9 @@ async function runAllScrapers() {
         console.log('\n✅ Proceso completado con éxito!');
     } catch (error) {
         console.error('\n❌ Error durante el proceso:', error);
+        process.exit(1);
+    } finally {
+        clearTimeout(timeout);
     }
 }
 

@@ -3,45 +3,31 @@ const path = require('path');
 const { db } = require('./config');
 const admin = require('firebase-admin');
 
-// Función para comparar datos y subir a Firebase si hay cambios
 async function uploadDataIfChanged(dataType) {
   try {
     const dataDir = path.join(__dirname, '..', 'data');
     const filePath = path.join(dataDir, `${dataType}.json`);
     
-    // Leer datos actuales
     const currentData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    
-    // Referencia a la colección
     const dataCollection = db.collection(dataType);
     
     let shouldUpload = true;
     
     try {
-      // Obtener el último documento de la colección
       const lastEntryQuery = await dataCollection
-        .orderBy('timestamp', 'desc')
-        .limit(1)
+        .doc('latest')
         .get();
       
-      // Comparar con los datos existentes en Firebase
-      if (!lastEntryQuery.empty) {
-        const lastEntry = lastEntryQuery.docs[0].data();
-        const lastData = lastEntry.data;
-        
-        // Comparación profunda de objetos
-        shouldUpload = JSON.stringify(currentData) !== JSON.stringify(lastData);
+      if (lastEntryQuery.exists) {
+        const lastEntry = lastEntryQuery.data();
+        shouldUpload = JSON.stringify(currentData) !== JSON.stringify(lastEntry.data);
       }
     } catch (error) {
       console.log(`ℹ️ No se encontraron datos previos en ${dataType}, se procederá con la subida`);
     }
     
     if (shouldUpload) {
-      // Usar un ID fijo para actualizar el documento
-      const docId = `${dataType}_latest`;
-      
-      // Actualizar o crear el documento con los nuevos datos
-      await dataCollection.doc(docId).set({
+      await dataCollection.doc('latest').set({
         data: currentData,
         timestamp: admin.firestore.FieldValue.serverTimestamp()
       });

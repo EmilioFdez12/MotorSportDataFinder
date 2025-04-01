@@ -2,13 +2,24 @@
 const admin = require('firebase-admin');
 const path = require('path');
 
-// Get the service account key file path
-const serviceAccountPath = path.join(__dirname, '..', 'serviceAccount.json');
-
-// Initialize Firebase Admin with your project credentials
-admin.initializeApp({
-  credential: admin.credential.cert(require(serviceAccountPath))
-});
+// Initialize Firebase Admin with credentials
+try {
+  // First try environment variables
+  if (process.env.FIREBASE_CREDENTIALS) {
+    admin.initializeApp({
+      credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_CREDENTIALS))
+    });
+  } else {
+    // Fallback to service account file
+    const serviceAccountPath = path.join(__dirname, '..', 'serviceAccount.json');
+    admin.initializeApp({
+      credential: admin.credential.cert(require(serviceAccountPath))
+    });
+  }
+} catch (error) {
+  console.error('❌ Error initializing Firebase:', error);
+  process.exit(1);
+}
 
 // Get Firestore database
 const db = admin.firestore();
