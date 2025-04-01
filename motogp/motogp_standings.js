@@ -37,15 +37,15 @@ async function scrapeMotoGPStandings() {
                 const rows = document.querySelectorAll('.standings-table__body-row');
                 return Array.from(rows).map(row => {
                     const position = row.querySelector('.standings-table__body-cell--pos')?.textContent.trim();
-                    const number = row.querySelector('.standings-table__body-cell--number')?.textContent.trim();
-                    const riderName = row.querySelector('.standings-table__rider-link')?.textContent.trim().replace("\s", "");
+                    const riderName = row.querySelector('.standings-table__rider-link')?.textContent.trim()
+                        .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+                        .trim();
                     const team = row.querySelector('.standings-table__body-cell--team')?.textContent.trim();
                     const points = row.querySelector('.standings-table__body-cell--points')?.textContent.trim();
 
                     return {
                         position,
-                        number,
-                        rider: riderName,
+                        name: riderName,
                         team,
                         points
                     };
@@ -53,11 +53,11 @@ async function scrapeMotoGPStandings() {
             });
 
             const uniqueRiders = [];
-            const riderNumbers = new Set();
+            const riderNames = new Set();
             
             for (const rider of standings) {
-                if (!riderNumbers.has(rider.number)) {
-                    riderNumbers.add(rider.number);
+                if (!riderNames.has(rider.name)) {
+                    riderNames.add(rider.name);
                     uniqueRiders.push(rider);
                 }
             }
