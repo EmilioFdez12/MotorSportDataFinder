@@ -28,6 +28,7 @@ async function scrapeMotoGPStandings() {
             await page.waitForSelector('.standings-table__body-row', { visible: true });
             await page.waitForSelector('.standings-table__rider-link', { visible: true });
 
+            // Asegurarse de que estamos en la categoría MotoGP
             if (await page.$('.standings-menu__item[data-category="motogp"]') !== null) {
                 await page.click('.standings-menu__item[data-category="motogp"]');
                 await page.waitForTimeout(1000);
@@ -41,7 +42,10 @@ async function scrapeMotoGPStandings() {
                         .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
                         .trim();
                     const team = row.querySelector('.standings-table__body-cell--team')?.textContent.trim();
-                    const points = row.querySelector('.standings-table__body-cell--points')?.textContent.trim();
+                    // Limpiar el formato de puntos para eliminar cualquier texto adicional
+                    let points = row.querySelector('.standings-table__body-cell--points')?.textContent.trim();
+                    // Extraer solo el número de puntos (antes del guión si existe)
+                    points = points.split('-')[0].trim();
 
                     return {
                         position,
@@ -52,11 +56,14 @@ async function scrapeMotoGPStandings() {
                 });
             });
 
+            // Filtrar solo pilotos de MotoGP (los primeros 23) y eliminar duplicados
             const uniqueRiders = [];
             const riderNames = new Set();
+            const maxMotoGPRiders = 23; // Limitar a los 23 pilotos de MotoGP
             
             for (const rider of standings) {
-                if (!riderNames.has(rider.name)) {
+                // Asegurarse de que todos los campos necesarios existen y no exceder el límite de pilotos
+                if (rider.name && rider.team && rider.points && !riderNames.has(rider.name) && uniqueRiders.length < maxMotoGPRiders) {
                     riderNames.add(rider.name);
                     uniqueRiders.push(rider);
                 }
