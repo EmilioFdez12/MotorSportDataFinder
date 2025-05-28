@@ -1,3 +1,6 @@
+serviceAccount.json
+.env
+
 # Logs
 logs
 *.log
