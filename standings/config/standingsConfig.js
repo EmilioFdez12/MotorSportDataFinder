@@ -1,4 +1,4 @@
-const { F1_TEAM_MAP, F1_DRIVER_INFO } = require('./f1standingsConfig');
+const { F1_TEAM_MAP, F1_DRIVER_INFO } = require('./f1StandingsConfig');
 const { MOTOGP_TEAM_MAP, MOTOGP_DRIVER_INFO } = require('./motogpStandingsConfig');
 const { INDYCAR_TEAM_MAP, INDYCAR_DRIVER_INFO } = require('./indycarStandingsConfig');
 
