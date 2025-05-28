@@ -1,0 +1,23 @@
+name: Update Standings
+
+on:
+  schedule:
+    # Execute every half an hour on Saturdays, Sundays, and Mondays
+    - cron: '*/30 * * * 6,0,1'
+  workflow_dispatch:
+
+jobs:
+  update-standings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Update standings
+        run: node main.js standings
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
