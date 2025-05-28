@@ -1,5 +1,6 @@
 const admin = require('firebase-admin');
 const fs = require('fs').promises;
+// Path module for handling file paths
 const path = require('path');
 const getStandings = require('./standings/getStandings');
 const { scrapeF1Calendar, scrapeMotoGPCalendar, scrapeIndycarCalendar } = require('./schedule/getCalendar');
@@ -12,17 +13,18 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   serviceAccount = require('./serviceAccount.json');
 }
 
-// Add this line to initialize the Firebase app
+// Initialize the Firebase app
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 const db = admin.firestore();
 
-// Function to process and upload standings to Firestore
+// Function to process standings for different categories and upload to Firestore
 async function processStandings() {
   const categories = ['f1', 'motogp', 'indycar'];
 
   for (const category of categories) {
+    // Get standings data for the current category
     console.log(`\nObteniendo clasificaciones de ${category.toUpperCase()}:`);
     const standings = await getStandings(category);
 
@@ -47,6 +49,7 @@ async function processStandings() {
 // Function to upload standings data directly to Firestore
 async function uploadStandingsData(collectionName, dataKey, data) {
   try {
+    // Get a reference to the Firestore collection
     const collectionRef = db.collection(collectionName);
     const batch = db.batch();
 
@@ -61,11 +64,12 @@ async function uploadStandingsData(collectionName, dataKey, data) {
     console.log(`Clasificaciones de ${collectionName} subidas exitosamente a Firestore`);
   } catch (error) {
     console.error(`Error al subir las clasificaciones a ${collectionName}:`, error);
+    // Re-throw the error to be caught by the calling function
     throw error;
   }
 }
 
-// Function to process calendars
+// Function to process calendars for different series
 async function processCalendars() {
   const calendarFunctions = [
     { fn: scrapeF1Calendar, collection: 'f1_schedule' },
@@ -76,7 +80,8 @@ async function processCalendars() {
   for (const { fn, collection } of calendarFunctions) {
     console.log(`\nIniciando scraping de ${collection}...`);
     try {
-      const calendarData = await fn(); // Scrape and get data directly
+      // Execute the scraping function for the current calendar
+      const calendarData = await fn();
       console.log(`Scraping de ${collection} completado.`);
 
       // Upload to Firestore directly
@@ -90,6 +95,7 @@ async function processCalendars() {
 // Function to upload calendar data directly to Firestore
 async function uploadCalendarData(calendarData, collectionName) {
   try {
+    // Get a reference to the Firestore collection
     const collectionRef = db.collection(collectionName);
     const batch = db.batch();
 
@@ -105,11 +111,13 @@ async function uploadCalendarData(calendarData, collectionName) {
     console.log(`Calendario subido exitosamente a ${collectionName}`);
   } catch (error) {
     console.error(`Error al subir el calendario a ${collectionName}:`, error);
+    // Re-throw the error to be caught by the calling function
     throw error;
   }
 }
 
-// Separate command-line scripts
+// Get the command line argument to determine which task to run
+// process.argv[0] is 'node', process.argv[1] is the script file path
 const command = process.argv[2];
 
 async function runTask() {
@@ -134,7 +142,7 @@ async function runTask() {
   } catch (error) {
     console.error('Error en el proceso:', error);
   } finally {
-    // Close Firebase connection
+    // Ensure Firebase app is deleted after the task completes or fails
     await admin.app().delete();
     console.log('Conexión con Firebase cerrada.');
   }

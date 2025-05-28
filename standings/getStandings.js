@@ -1,10 +1,14 @@
+// Import necessary libraries
 const axios = require('axios');
 const cheerio = require('cheerio');
 const config = require('./config/standingsConfig');
 
+// Async function to get standings for a given category
 async function getStandings(category) {
   try {
+    // Get configuration for the specified category
     const categoryConfig = config[category];
+    // Throw error if category is not supported
     if (!categoryConfig) {
       throw new Error(`Categoría no soportada: ${category}`);
     }
@@ -13,14 +17,17 @@ async function getStandings(category) {
     const { data: html } = await axios.get(url);
     const $ = cheerio.load(html);
 
+    // Array to store driver data
     const drivers = [];
     let driverId = 1;
 
-    // Scrape driver standings
+    // Scrape driver standings from the HTML
     $('tr.ms-table_row').each((_, row) => {
       const columns = $(row).find('td');
 
+      // Skip rows that don't have enough columns for standings data
       if (columns.length < 3) return;
+
 
       const pos = parseInt($(columns[0]).text().trim());
       const driverCell = $(columns[1]);
@@ -29,12 +36,14 @@ async function getStandings(category) {
       const team = driverCell.find('.team').text().trim();
       const points = parseInt($(columns[2]).text().trim()) || 0;
 
+      // Get driver information from the config based on short name
       const info = driverInfo[shortName];
       if (!info) {
         console.warn(`Piloto no encontrado en el mapa: ${shortName}`);
         return;
       }
 
+      // Get team information from the config based on team name
       const teamInfo = teamMap[team];
       if (!teamInfo) {
         console.warn(`Equipo no encontrado en el mapa: ${team}`);
@@ -55,7 +64,7 @@ async function getStandings(category) {
       });
     });
 
-    // Calculate constructor standings
+    // Calculate constructor standings based on driver points
     const constructorMap = {};
     drivers.forEach(driver => {
       const teamId = driver.teamId;
@@ -71,7 +80,7 @@ async function getStandings(category) {
       constructorMap[teamId].points += driver.points;
     });
 
-    // Convert constructor map to array and sort by points
+    // Convert constructor map to an array and sort by points
     const constructors = Object.values(constructorMap)
       .sort((a, b) => b.points - a.points) // Sort descending by points
       .map((constructor, index) => ({
@@ -85,10 +94,12 @@ async function getStandings(category) {
       }));
 
     return { drivers, constructors };
+    // Catch any errors during the process
   } catch (error) {
     console.error(`Error al obtener las clasificaciones de ${category}:`, error);
     return { drivers: [], constructors: [] };
   }
 }
 
+// Export the getStandings function
 module.exports = getStandings;
