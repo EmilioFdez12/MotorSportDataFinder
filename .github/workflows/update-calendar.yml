@@ -2,7 +2,7 @@ name: Update Calendar
 
 on:
   schedule:
-    # Execute every two hours on Fridays
+    # Execute every two hours on Fridays, Saturdays, and Sundays
     - cron: '0 */2 * * 5,6,0'
   workflow_dispatch:
 
@@ -10,13 +10,23 @@ jobs:
   update-calendar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        name: Checkout repository
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20' # Updated to a newer, supported version
       - name: Install dependencies
         run: npm ci
+      - name: Install Chromium dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates fonts-liberation libappindicator3-1 libasound2 libatk-bridge2.0-0 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 lsb-release wget xdg-utils
+      - name: Configure SUID sandbox
+        run: |
+          sudo chown root:root /home/runner/.cache/puppeteer/chrome/linux-*/chrome-linux64/chrome_sandbox
+          sudo chmod 4755 /home/runner/.cache/puppeteer/chrome/linux-*/chrome-linux64/chrome_sandbox
+          echo "CHROME_DEVEL_SANDBOX=/home/runner/.cache/puppeteer/chrome/linux-*/chrome-linux64/chrome_sandbox" >> $GITHUB_ENV
       - name: Update calendar
         run: node main.js calendar
         env:
