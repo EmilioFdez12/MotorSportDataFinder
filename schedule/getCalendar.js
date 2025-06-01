@@ -28,12 +28,15 @@ function toISODateTime(day, time) {
 }
 
 async function scrapeCalendar(category) {
-    const { url, sessionMap } = config[category]; // Eliminamos la referencia a outputFile
+    const { url, sessionMap } = config[category];
     let browser;
     try {
         // Launch browser
         console.log(`Debug: [${category}] Launching browser`);
-        browser = await puppeteer.launch({ headless: true });
+        browser = await puppeteer.launch({ 
+            headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
         const page = await browser.newPage();
         await page.emulateTimezone('Europe/Madrid');
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
