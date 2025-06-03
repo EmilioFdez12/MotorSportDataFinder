@@ -1,4 +1,3 @@
-// f1_scraper.js
 const puppeteer = require('puppeteer');
 const { DateTime } = require('luxon');
 const flagMap = require('./flags.js');
@@ -15,7 +14,7 @@ function toISODateTime(day, time) {
         const month = monthMap[monthAbbr];
         if (!month) throw new Error(`Invalid month: ${monthAbbr}`);
 
-        const year = '2025';
+        const year = new Date().getFullYear();
         const dateStr = `${year}-${month}-${dayNum.padStart(2, '0')} ${time}`;
         const dt = DateTime.fromFormat(dateStr, 'yyyy-MM-dd HH:mm', { zone: 'Europe/Madrid' });
 
@@ -27,18 +26,21 @@ function toISODateTime(day, time) {
     }
 }
 
+// Scrape calendar data
 async function scrapeCalendar(category) {
     const { url, sessionMap } = config[category];
     let browser;
     try {
         // Launch browser
         console.log(`Debug: [${category}] Launching browser`);
-        browser = await puppeteer.launch({ 
+        browser = await puppeteer.launch({
             headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
+        // Create a new page
         const page = await browser.newPage();
         await page.emulateTimezone('Europe/Madrid');
+        // Set user agent
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
         // Navigate to the schedule page
@@ -84,6 +86,7 @@ async function scrapeCalendar(category) {
             function normalizeText(text) {
                 return text
                     .toLowerCase()
+                    // Remove diacritics
                     .normalize('NFD')
                     .replace(/[\u0300-\u036f]/g, '')
                     .replace(/\s+/g, '');
@@ -118,15 +121,16 @@ async function scrapeCalendar(category) {
                 const gpNameElement = element.querySelector('.ms-schedule-table-item-main__event a span');
                 let gpName = gpNameElement ? gpNameElement.textContent.trim() : 'Unknown GP';
 
-                // Clean and format GP name - MODIFICADO: ahora mantenemos el nombre original
+                // Clean and format GP name
                 let formattedGpName = gpName;
-                
+
                 // Extract main date
                 const dateElement = element.querySelector('.ms-schedule-table-date__value');
                 const dates = dateElement ? dateElement.textContent.trim() : 'TBD';
 
                 // Normalize GP name for flag matching
                 let normalizedGpName = formattedGpName
+                    // Remove "GP"
                     .replace(/(GP de\s*)+/gi, '')
                     .replace('Arabia Saudí', 'Arabia')
                     .trim();
@@ -184,7 +188,7 @@ async function scrapeCalendar(category) {
             console.log(`Debug: [${category}] Race "${race.gp}" has ${Object.keys(race.sessions).length} sessions`);
         }
 
-        // Eliminamos el guardado a JSON y simplemente devolvemos los datos
+        // Return races
         console.log(`Debug: [${category}] Returning ${races.length} races`);
         return races;
     } catch (error) {
@@ -228,11 +232,11 @@ if (require.main === module) {
             console.log('Iniciando scraping de F1...');
             const f1Data = await scrapeF1Calendar();
             console.log(`Scraping de F1 completado. Obtenidos ${f1Data.length} eventos.`);
-            
+
             console.log('Iniciando scraping de MotoGP...');
             const motoGPData = await scrapeMotoGPCalendar();
             console.log(`Scraping de MotoGP completado. Obtenidos ${motoGPData.length} eventos.`);
-            
+
             console.log('Iniciando scraping de Indycar...');
             const indycarData = await scrapeIndycarCalendar();
             console.log(`Scraping de Indycar completado. Obtenidos ${indycarData.length} eventos.`);

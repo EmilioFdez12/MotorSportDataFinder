@@ -44,8 +44,8 @@ const MOTOGP_TEAM_MAP = {
   "Honda HRC": { 
       id: 8, 
       name: "Honda HRC",
-      car: "/motogp/images/cars/repsol-honda.webp",
-      logo: "/motogp/images/logos/honda-repsol.webp"
+      car: "/motogp/images/cars/honda-hrc.webp",
+      logo: "/motogp/images/logos/honda-hrc.webp"
   },
   "Trackhouse Racing Team": { 
       id: 9, 

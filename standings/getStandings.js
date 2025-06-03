@@ -1,4 +1,3 @@
-// Import necessary libraries
 const axios = require('axios');
 const cheerio = require('cheerio');
 const config = require('./config/standingsConfig');
@@ -27,7 +26,6 @@ async function getStandings(category) {
 
       // Skip rows that don't have enough columns for standings data
       if (columns.length < 3) return;
-
 
       const pos = parseInt($(columns[0]).text().trim());
       const driverCell = $(columns[1]);
@@ -82,7 +80,8 @@ async function getStandings(category) {
 
     // Convert constructor map to an array and sort by points
     const constructors = Object.values(constructorMap)
-      .sort((a, b) => b.points - a.points) // Sort descending by points
+    // Sort descending by points
+      .sort((a, b) => b.points - a.points) 
       .map((constructor, index) => ({
         id: index + 1,
         position: index + 1,
@@ -94,12 +93,10 @@ async function getStandings(category) {
       }));
 
     return { drivers, constructors };
-    // Catch any errors during the process
   } catch (error) {
     console.error(`Error al obtener las clasificaciones de ${category}:`, error);
     return { drivers: [], constructors: [] };
   }
 }
 
-// Export the getStandings function
 module.exports = getStandings;

@@ -1,4 +1,3 @@
-// standingsConfig.js
 const F1_TEAM_MAP = {
     "Red Bull Racing": { 
       id: 1, 
@@ -75,6 +74,7 @@ const F1_TEAM_MAP = {
     "L. Stroll": { name: "Lance Stroll", number: 18, portrait: "/f1/images/drivers/LANSTR01.webp" },
     "P. Gasly": { name: "Pierre Gasly", number: 10, portrait: "/f1/images/drivers/PIEGAS01.webp" },
     "J. Doohan": { name: "Jack Doohan", number: 7, portrait: "/f1/images/drivers/JACDOO01.webp" },
+    "F. Colapinto": { name: "Franco Colapinto", number: 43, portrait: "/f1/images/drivers/FRACOL.webp" },
     "Y. Tsunoda": { name: "Yuki Tsunoda", number: 22, portrait: "/f1/images/drivers/YUKTSU01.webp" },
     "I. Hadjar": { name: "Isack Hadjar", number: 6, portrait: "/f1/images/drivers/ISAHAD01.webp" },
     "A. Albon": { name: "Alexander Albon", number: 23, portrait: "/f1/images/drivers/ALEALB01.webp" },
